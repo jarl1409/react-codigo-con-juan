@@ -1,22 +1,29 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./index.css";
 import Guitar from "./components/Guitar";
 import Header from "./components/Header";
 import { db } from "./data/db";
 
 function App() {
-  //stake
-
+  //state
+  const initialCart = () => {
+    const localStorageCart = localStorage.getItem("cart");
+    return localStorageCart ? JSON.parse(localStorageCart) : [];
+  };
   const [data, setData] = useState(db);
-  const [cart, setCart] = useState([]);
-  
+  const [cart, setCart] = useState(initialCart);
+
   const MIN_ITEMS = 1;
   const MAX_ITEMS = 5;
+
+  useEffect(() => {
+    localStorage.setItem("cart", JSON.stringify(cart));
+  }, [cart]);
 
   function addToCart(item) {
     const itemExists = cart.findIndex((guitar) => guitar.id === item.id);
     if (itemExists >= 0) {
-      if(cart[itemExists].quantity >= MAX_ITEMS) return
+      if (cart[itemExists].quantity >= MAX_ITEMS) return;
       const updatedCart = [...cart];
       updatedCart[itemExists].quantity++;
       setCart(updatedCart);
@@ -58,6 +65,10 @@ function App() {
     setCart(updatedCart);
   }
 
+  function clearCart() {
+    setCart([]);
+  }
+
   return (
     <>
       <Header
@@ -65,6 +76,7 @@ function App() {
         removeFromCart={removeFromCart}
         increaseQuantity={increaseQuantity}
         reduceQuantity={reduceQuantity}
+        clearCart={clearCart}
       />
       <main className="container-xl mt-5">
         <h2 className="text-center">Nuestra Colección</h2>
